@@ -1,0 +1,106 @@
+---
+title: "Reproducible research"
+author: "Toghrul Abilli"
+date: "10/7/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is R markdown for explotary data analysis
+
+1. Code for reading in the dataset and/or processing the data
+
+```{r setwd, echo = FALSE}
+
+setwd('C:/Users/tabilli/Desktop/Projects/Rproject/Reproducible')
+```
+
+After setting working directory, csv data read from source.
+```{r readdata, echo=TRUE}
+
+activity<-read.csv('activity.csv')
+
+```
+To understand data, we should look at summaries.
+As shown from the table, many NA's are observed in step column. 
+```{r summary, echo=TRUE}
+
+summary(activity)
+
+```
+Lets look at size of data using dim function.
+```{r dim, echo=TRUE}
+
+dim(activity)
+
+```
+
+2. Histogram of the total number of steps taken each day
+
+```{r hist, echo=TRUE}
+steps_each_day<-aggregate(steps ~ date, activity, sum)
+hist(steps_each_day$steps, col = "blue")
+
+```
+
+3. Mean and median number of steps taken each day
+
+```{r median, echo=TRUE}
+median(steps_each_day$steps)
+mean(steps_each_day$steps)
+```
+
+4. Time series plot of the average number of steps taken
+
+```{r time, echo=TRUE}
+stepsbyinterval<-aggregate(steps ~ interval, activity, mean)
+plot(stepsbyinterval$interval, stepsbyinterval$steps, type = "l", xlab = "Interval", ylab = "Average steps",main = "Average number of steps")
+```
+
+5. The 5-minute interval that, on average, contains the maximum number of steps
+
+```{r maxinterval, echo=TRUE}
+max_interval<-stepsbyinterval[which.max(stepsbyinterval$steps),1]
+max_interval
+
+```
+
+6. Code to describe and show a strategy for imputing missing data
+
+
+```{r impute, echo=TRUE}
+
+activity$steps[is.na(activity$steps)]<-mean(activity$steps,na.rm=TRUE)
+
+```
+
+7. Histogram of the total number of steps taken each day after missing values are imputed
+
+```{r hist1, echo=TRUE}
+stepsbyday_1<-aggregate(steps ~ date, activity, sum)
+
+hist(stepsbyday_1$steps, col="blue",xlab="Steps", ylab = "Frequency", main = "Total number of steps taken each day after missing values", breaks = 10)
+```
+
+8. Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+
+```{r plotcompare, echo=TRUE}
+
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday",  "Friday")
+activity$dtype = as.factor(ifelse(is.element(weekdays(as.Date(activity$date)),weekdays), "Weekday", "Weekend"))
+steps_by_interval_i <- aggregate(steps ~ interval + dtype, activity, mean)
+library(lattice)
+
+xyplot(steps_by_interval_i$steps ~ steps_by_interval_i$interval|steps_by_interval_i$dtype, main="Average number of steps per interval",xlab="Interval", ylab="Steps",layout=c(1,2), type="l")
+
+```
+
+
+
+
+
